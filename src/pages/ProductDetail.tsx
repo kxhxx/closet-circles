@@ -8,9 +8,10 @@ import Navbar from "@/components/Navbar";
 
 const ProductDetail = () => {
   const { id } = useParams();
+  const numericId = id ? parseInt(id) : 0;
 
   const { data: item, isLoading } = useQuery({
-    queryKey: ["item", id],
+    queryKey: ["item", numericId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("items")
@@ -21,7 +22,7 @@ const ProductDetail = () => {
             profile_picture
           )
         `)
-        .eq("id", id)
+        .eq("id", numericId)
         .maybeSingle();
 
       if (error) throw error;
