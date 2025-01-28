@@ -10,7 +10,7 @@ const Navbar = () => {
             <Menu className="h-6 w-6" />
           </Button>
           <a href="/" className="text-depop-red font-bold text-2xl">
-            depop
+            repop
           </a>
         </div>
         
