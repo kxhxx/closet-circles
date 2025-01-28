@@ -10,9 +10,12 @@ const ProductDetail = () => {
   const { id } = useParams();
   const numericId = id ? parseInt(id) : 0;
 
-  const { data: item, isLoading } = useQuery({
+  console.log("Fetching product with ID:", numericId); // Debug log
+
+  const { data: item, isLoading, error } = useQuery({
     queryKey: ["item", numericId],
     queryFn: async () => {
+      console.log("Executing query for ID:", numericId); // Debug log
       const { data, error } = await supabase
         .from("items")
         .select(`
@@ -25,13 +28,23 @@ const ProductDetail = () => {
         .eq("id", numericId)
         .maybeSingle();
 
-      if (error) throw error;
+      console.log("Query result:", { data, error }); // Debug log
+
+      if (error) {
+        console.error("Supabase error:", error); // Debug log
+        throw error;
+      }
       return data;
     },
   });
 
   if (isLoading) {
     return <div>Loading...</div>;
+  }
+
+  if (error) {
+    console.error("Query error:", error); // Debug log
+    return <div>Error loading product</div>;
   }
 
   if (!item) {
