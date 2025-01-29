@@ -57,12 +57,22 @@ const ProductGrid = () => {
                 </div>
                 <div className="mt-2">
                   <div className="flex justify-between">
-                    <span className="text-lg font-medium">${product.price}</span>
+                    <div className="flex gap-2">
+                      <span className="text-lg font-medium">${product.price}</span>
+                    </div>
                     <span className="text-sm text-gray-500">
-                      {/* Size field doesn't exist in our schema yet */}
+                      {product.category}
                     </span>
                   </div>
                   <h3 className="text-sm text-gray-700">{product.title}</h3>
+                  <div className="mt-2 flex gap-2">
+                    <Button variant="outline" size="sm" className="w-full">
+                      Add to Cart
+                    </Button>
+                    <Button variant="default" size="sm" className="w-full">
+                      Buy Now
+                    </Button>
+                  </div>
                 </div>
               </div>
             </Link>
