@@ -13,13 +13,25 @@ const ProductGrid = () => {
         .select("*")
         .order("created_at", { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching products:", error);
+        throw error;
+      }
+      console.log("Fetched products:", data);
       return data;
     },
   });
 
   if (isLoading) {
     return <div>Loading...</div>;
+  }
+
+  if (!products || products.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-gray-500">No products available</p>
+      </div>
+    );
   }
 
   return (
@@ -38,7 +50,7 @@ const ProductGrid = () => {
         </div>
         
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {products?.map((product) => (
+          {products.map((product) => (
             <Link key={product.id} to={`/product/${product.id}`}>
               <div className="group relative">
                 <div className="aspect-square overflow-hidden rounded-lg bg-gray-100">
