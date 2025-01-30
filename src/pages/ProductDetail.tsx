@@ -1,21 +1,20 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Heart, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Navbar from "@/components/Navbar";
 
 const ProductDetail = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const numericId = id ? parseInt(id) : 0;
-
-  console.log("Fetching product with ID:", numericId); // Debug log
 
   const { data: item, isLoading, error } = useQuery({
     queryKey: ["item", numericId],
     queryFn: async () => {
-      console.log("Executing query for ID:", numericId); // Debug log
       const { data, error } = await supabase
         .from("items")
         .select(`
@@ -28,12 +27,21 @@ const ProductDetail = () => {
         .eq("id", numericId)
         .maybeSingle();
 
-      console.log("Query result:", { data, error }); // Debug log
+      if (error) throw error;
+      return data;
+    },
+  });
 
-      if (error) {
-        console.error("Supabase error:", error); // Debug log
-        throw error;
-      }
+  const { data: profile } = useQuery({
+    queryKey: ["testProfile"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("username", "kshitij")
+        .single();
+
+      if (error) throw error;
       return data;
     },
   });
@@ -43,7 +51,6 @@ const ProductDetail = () => {
   }
 
   if (error) {
-    console.error("Query error:", error); // Debug log
     return <div>Error loading product</div>;
   }
 
@@ -86,24 +93,30 @@ const ProductDetail = () => {
             <Card>
               <CardContent className="p-4">
                 <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center">
-                    {item.profiles?.profile_picture ? (
-                      <img
-                        src={item.profiles.profile_picture}
-                        alt={item.profiles.username}
-                        className="h-full w-full rounded-full object-cover"
-                      />
-                    ) : (
-                      <User className="h-6 w-6 text-gray-400" />
-                    )}
-                  </div>
-                  <div>
-                    <h3 className="font-medium">
-                      {item.profiles?.username || "Unknown Seller"}
-                    </h3>
-                    <p className="text-sm text-gray-500">Seller</p>
-                  </div>
-                  <Button className="ml-auto">Message</Button>
+                  <Button 
+                    variant="ghost" 
+                    className="flex items-center gap-4 flex-1"
+                    onClick={() => navigate('/profile')}
+                  >
+                    <div className="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                      {profile?.profile_picture ? (
+                        <img
+                          src={profile.profile_picture}
+                          alt={profile.username}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <User className="h-6 w-6 text-gray-400" />
+                      )}
+                    </div>
+                    <div className="flex-1 text-left">
+                      <h3 className="font-medium">
+                        {profile?.username || "Unknown Seller"}
+                      </h3>
+                      <p className="text-sm text-gray-500">Seller</p>
+                    </div>
+                  </Button>
+                  <Button>Message</Button>
                 </div>
               </CardContent>
             </Card>
