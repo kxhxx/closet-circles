@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import Navbar from "@/components/Navbar";
 import { useToast } from "@/components/ui/use-toast";
+import { useEffect } from "react";
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -57,6 +58,23 @@ const ProductDetail = () => {
     },
   });
 
+  // Handle errors and navigation with useEffect
+  useEffect(() => {
+    if (error || !isValidId) {
+      const errorMessage = !isValidId ? "Invalid product ID" : "Product not found";
+      
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+
+      // Redirect to home after a short delay
+      const timeout = setTimeout(() => navigate("/"), 2000);
+      return () => clearTimeout(timeout); // Cleanup timeout on unmount
+    }
+  }, [error, isValidId, toast, navigate]);
+
   // Show loading state
   if (isLoading) {
     return (
@@ -69,25 +87,15 @@ const ProductDetail = () => {
     );
   }
 
-  // Handle errors
+  // Show error state
   if (error || !isValidId) {
-    const errorMessage = !isValidId ? "Invalid product ID" : "Product not found";
-    
-    // Show error toast
-    toast({
-      title: "Error",
-      description: errorMessage,
-      variant: "destructive",
-    });
-
-    // Redirect to home after a short delay
-    setTimeout(() => navigate("/"), 2000);
-
     return (
       <div className="min-h-screen bg-white">
         <Navbar />
         <main className="container mx-auto px-4 py-8">
-          <div className="text-center text-red-500">{errorMessage}</div>
+          <div className="text-center text-red-500">
+            {!isValidId ? "Invalid product ID" : "Product not found"}
+          </div>
         </main>
       </div>
     );
