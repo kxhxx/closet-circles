@@ -5,8 +5,11 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { User } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const Index = () => {
+  const navigate = useNavigate();
+  
   const { data: profile } = useQuery({
     queryKey: ["testProfile"],
     queryFn: async () => {
@@ -27,7 +30,10 @@ const Index = () => {
       <main>
         {profile && (
           <div className="mx-auto max-w-7xl px-4 py-8">
-            <div className="mb-8 flex items-center space-x-4">
+            <div 
+              className="mb-8 flex items-center space-x-4 cursor-pointer hover:opacity-90 transition-opacity"
+              onClick={() => navigate('/profile')}
+            >
               <Avatar className="h-16 w-16">
                 <AvatarImage src={profile.profile_picture} alt={profile.username} />
                 <AvatarFallback>

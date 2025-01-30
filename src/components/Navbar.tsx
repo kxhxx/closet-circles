@@ -1,7 +1,28 @@
 import { Menu, Search, ShoppingBag } from "lucide-react";
 import { Button } from "./ui/button";
+import { useNavigate } from "react-router-dom";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { User } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const Navbar = () => {
+  const navigate = useNavigate();
+  
+  const { data: profile } = useQuery({
+    queryKey: ["testProfile"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("username", "kshitij")
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+  });
+
   return (
     <nav className="border-b">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
@@ -29,9 +50,25 @@ const Navbar = () => {
           <Button variant="ghost" size="icon">
             <ShoppingBag className="h-6 w-6" />
           </Button>
-          <Button className="bg-black text-white hover:bg-gray-800">
-            Sign up
-          </Button>
+          {profile ? (
+            <Button 
+              variant="ghost" 
+              className="flex items-center gap-2"
+              onClick={() => navigate('/profile')}
+            >
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={profile.profile_picture} alt={profile.username} />
+                <AvatarFallback>
+                  <User className="h-4 w-4" />
+                </AvatarFallback>
+              </Avatar>
+              <span className="hidden md:inline">{profile.username}</span>
+            </Button>
+          ) : (
+            <Button className="bg-black text-white hover:bg-gray-800">
+              Sign up
+            </Button>
+          )}
         </div>
       </div>
     </nav>
