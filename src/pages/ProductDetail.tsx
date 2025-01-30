@@ -4,17 +4,26 @@ import { Heart, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Navbar from "@/components/Navbar";
+import { useToast } from "@/components/ui/use-toast";
 
 const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const numericId = id ? parseInt(id) : 0;
+  const { toast } = useToast();
+  
+  // Validate ID parameter
+  const numericId = id ? Number(id) : null;
+  const isValidId = numericId && !isNaN(numericId) && Number.isInteger(numericId);
 
   const { data: item, isLoading, error } = useQuery({
     queryKey: ["item", numericId],
     queryFn: async () => {
+      // Don't make the API call if ID is invalid
+      if (!isValidId) {
+        throw new Error("Invalid product ID");
+      }
+
       const { data, error } = await supabase
         .from("items")
         .select(`
@@ -28,8 +37,10 @@ const ProductDetail = () => {
         .maybeSingle();
 
       if (error) throw error;
+      if (!data) throw new Error("Product not found");
       return data;
     },
+    retry: false, // Don't retry on invalid IDs
   });
 
   const { data: profile } = useQuery({
@@ -46,16 +57,51 @@ const ProductDetail = () => {
     },
   });
 
+  // Show loading state
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="min-h-screen bg-white">
+        <Navbar />
+        <main className="container mx-auto px-4 py-8">
+          <div className="text-center">Loading...</div>
+        </main>
+      </div>
+    );
   }
 
-  if (error) {
-    return <div>Error loading product</div>;
+  // Handle errors
+  if (error || !isValidId) {
+    const errorMessage = !isValidId ? "Invalid product ID" : "Product not found";
+    
+    // Show error toast
+    toast({
+      title: "Error",
+      description: errorMessage,
+      variant: "destructive",
+    });
+
+    // Redirect to home after a short delay
+    setTimeout(() => navigate("/"), 2000);
+
+    return (
+      <div className="min-h-screen bg-white">
+        <Navbar />
+        <main className="container mx-auto px-4 py-8">
+          <div className="text-center text-red-500">{errorMessage}</div>
+        </main>
+      </div>
+    );
   }
 
   if (!item) {
-    return <div>Product not found</div>;
+    return (
+      <div className="min-h-screen bg-white">
+        <Navbar />
+        <main className="container mx-auto px-4 py-8">
+          <div className="text-center">Product not found</div>
+        </main>
+      </div>
+    );
   }
 
   return (
