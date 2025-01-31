@@ -1,45 +1,29 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Mail, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import Navbar from "@/components/Navbar";
 
 const Profile = () => {
   const navigate = useNavigate();
+  const { username } = useParams(); // Get username from URL
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("all");
   const [session, setSession] = useState<any>(null);
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) {
-        navigate("/auth");
-        return;
-      }
-      setSession(session);
-    });
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
-
-    return () => subscription.unsubscribe();
-  }, [navigate]);
-
+  // Fetch profile data based on username parameter
   const { data: profile, isLoading: profileLoading } = useQuery({
-    queryKey: ["profile", session?.user?.id],
+    queryKey: ["profile", username],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
-        .eq("id", session?.user?.id)
-        .single();
+        .eq("username", username)
+        .maybeSingle();
 
       if (error) {
         console.error("Error fetching profile:", error);
@@ -51,18 +35,29 @@ const Profile = () => {
         throw error;
       }
 
+      if (!data) {
+        toast({
+          title: "Error",
+          description: "Profile not found",
+          variant: "destructive",
+        });
+        navigate("/");
+        throw new Error("Profile not found");
+      }
+
       return data;
     },
-    enabled: !!session?.user?.id,
+    enabled: !!username,
   });
 
+  // Fetch items for the profile
   const { data: userItems, isLoading: itemsLoading } = useQuery({
-    queryKey: ["userItems", session?.user?.id],
+    queryKey: ["userItems", profile?.id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("items")
         .select("*")
-        .eq("user_id", session?.user?.id)
+        .eq("user_id", profile?.id)
         .order("created_at", { ascending: false });
 
       if (error) {
@@ -77,11 +72,43 @@ const Profile = () => {
 
       return data;
     },
-    enabled: !!session?.user?.id,
+    enabled: !!profile?.id,
   });
 
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
   if (profileLoading || itemsLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <main className="container mx-auto px-4 py-8">
+          <div className="text-center">Loading...</div>
+        </main>
+      </div>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <main className="container mx-auto px-4 py-8">
+          <div className="text-center">Profile not found</div>
+        </main>
+      </div>
+    );
   }
 
   const filteredItems = userItems?.filter((item) => {
@@ -96,6 +123,8 @@ const Profile = () => {
         return true;
     }
   });
+
+  const isOwnProfile = session?.user?.id === profile.id;
 
   return (
     <div className="min-h-screen bg-background">
@@ -120,9 +149,15 @@ const Profile = () => {
                 <p className="text-muted-foreground">Active today</p>
               </div>
               <div className="flex gap-2">
-                <Button variant="outline" onClick={() => navigate("/profile/edit")}>
-                  Edit Profile
-                </Button>
+                {isOwnProfile ? (
+                  <Button variant="outline" onClick={() => navigate("/profile/edit")}>
+                    Edit Profile
+                  </Button>
+                ) : (
+                  <Button variant="outline">
+                    Follow
+                  </Button>
+                )}
                 <Button variant="outline" size="icon">
                   <Mail className="h-4 w-4" />
                 </Button>
