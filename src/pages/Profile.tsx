@@ -1,17 +1,17 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { Pencil, User } from "lucide-react";
+import { Mail, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import Navbar from "@/components/Navbar";
 
 const Profile = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [activeTab, setActiveTab] = useState("all");
   const [session, setSession] = useState<any>(null);
 
   useEffect(() => {
@@ -84,76 +84,111 @@ const Profile = () => {
     return <div>Loading...</div>;
   }
 
+  const filteredItems = userItems?.filter((item) => {
+    switch (activeTab) {
+      case "selling":
+        return !item.is_sold;
+      case "sold":
+        return item.is_sold;
+      case "likes":
+        return false; // Implement likes functionality later
+      default:
+        return true;
+    }
+  });
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="container mx-auto px-4 py-8">
-        <div className="grid gap-8 md:grid-cols-3">
-          {/* Profile Info */}
-          <Card className="md:col-span-1">
-            <CardContent className="p-6">
-              <div className="flex flex-col items-center space-y-4">
-                <Avatar className="h-24 w-24">
-                  {profile?.profile_picture ? (
-                    <AvatarImage src={profile.profile_picture} alt={profile.username} />
-                  ) : (
-                    <AvatarFallback>
-                      <User className="h-12 w-12" />
-                    </AvatarFallback>
-                  )}
-                </Avatar>
-                <div className="text-center">
-                  <h2 className="text-2xl font-bold">{profile?.username}</h2>
-                  <p className="text-muted-foreground">{profile?.bio || "No bio yet"}</p>
-                </div>
-                <div className="flex gap-4 text-center">
-                  <div>
-                    <div className="text-2xl font-bold">{profile?.followers_count || 0}</div>
-                    <div className="text-sm text-muted-foreground">Followers</div>
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold">{profile?.following_count || 0}</div>
-                    <div className="text-sm text-muted-foreground">Following</div>
-                  </div>
-                </div>
-                <Button
-                  onClick={() => navigate("/profile/edit")}
-                  variant="outline"
-                  className="w-full"
-                >
-                  <Pencil className="mr-2 h-4 w-4" />
+      <main className="container mx-auto px-4 py-8 max-w-4xl">
+        {/* Profile Header */}
+        <div className="flex items-start gap-6 mb-8">
+          <Avatar className="h-24 w-24">
+            {profile?.profile_picture ? (
+              <AvatarImage src={profile.profile_picture} alt={profile.username} />
+            ) : (
+              <AvatarFallback>
+                <User className="h-12 w-12" />
+              </AvatarFallback>
+            )}
+          </Avatar>
+          
+          <div className="flex-1">
+            <div className="flex justify-between items-start mb-4">
+              <div>
+                <h1 className="text-2xl font-bold mb-1">{profile?.username}</h1>
+                <p className="text-muted-foreground">Active today</p>
+              </div>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={() => navigate("/profile/edit")}>
                   Edit Profile
                 </Button>
+                <Button variant="outline" size="icon">
+                  <Mail className="h-4 w-4" />
+                </Button>
               </div>
-            </CardContent>
-          </Card>
-
-          {/* User Items */}
-          <div className="md:col-span-2">
-            <h3 className="mb-4 text-xl font-bold">Listed Items</h3>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {userItems?.map((item) => (
-                <Card key={item.id} className="overflow-hidden">
-                  <CardContent className="p-4">
-                    <div className="aspect-square overflow-hidden rounded-lg bg-muted">
-                      <img
-                        src="/placeholder.svg"
-                        alt={item.title}
-                        className="h-full w-full object-cover"
-                      />
-                    </div>
-                    <h4 className="mt-2 font-semibold">{item.title}</h4>
-                    <p className="text-lg font-bold">${item.price}</p>
-                  </CardContent>
-                </Card>
-              ))}
-              {userItems?.length === 0 && (
-                <p className="col-span-full text-center text-muted-foreground">
-                  No items listed yet
-                </p>
-              )}
             </div>
+            
+            <div className="flex gap-6 mb-4">
+              <div className="text-center">
+                <div className="font-bold">{profile?.followers_count || 0}</div>
+                <div className="text-sm text-muted-foreground">Followers</div>
+              </div>
+              <div className="text-center">
+                <div className="font-bold">{profile?.following_count || 0}</div>
+                <div className="text-sm text-muted-foreground">Following</div>
+              </div>
+            </div>
+            
+            <p className="text-muted-foreground">{profile?.bio || "No bio yet"}</p>
           </div>
+        </div>
+
+        {/* Tabs */}
+        <div className="border-b mb-6">
+          <div className="flex gap-8">
+            {["all", "selling", "sold", "likes"].map((tab) => (
+              <button
+                key={tab}
+                className={`pb-2 px-1 capitalize ${
+                  activeTab === tab
+                    ? "border-b-2 border-black font-semibold"
+                    : "text-muted-foreground"
+                }`}
+                onClick={() => setActiveTab(tab)}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Items Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+          {filteredItems?.map((item) => (
+            <div
+              key={item.id}
+              className="aspect-square relative group cursor-pointer"
+              onClick={() => navigate(`/product/${item.id}`)}
+            >
+              <img
+                src={"/lovable-uploads/bd4bead3-ca1c-4e4f-883b-fffa05c64b81.png"}
+                alt={item.title}
+                className="w-full h-full object-cover rounded-lg"
+              />
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-end p-4">
+                <div className="text-white">
+                  <div className="font-semibold">{item.title}</div>
+                  <div>${item.price}</div>
+                </div>
+              </div>
+            </div>
+          ))}
+          {filteredItems?.length === 0 && (
+            <div className="col-span-full text-center py-8 text-muted-foreground">
+              No items to display
+            </div>
+          )}
         </div>
       </main>
     </div>
