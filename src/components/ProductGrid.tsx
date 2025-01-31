@@ -3,7 +3,7 @@ import { Button } from "./ui/button";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "./ui/input";
 import {
   Select,
@@ -12,24 +12,33 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import { Checkbox } from "./ui/checkbox";
 
 const ProductGrid = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [priceRange, setPriceRange] = useState("all");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
 
+  // Debounce search query
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 500); // Wait for 500ms after the user stops typing
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
   const { data: products, isLoading } = useQuery({
-    queryKey: ["products", searchQuery, priceRange, selectedCategory, sortBy],
+    queryKey: ["products", debouncedSearch, priceRange, selectedCategory, sortBy],
     queryFn: async () => {
       let query = supabase
         .from("items")
         .select("*");
 
       // Apply search filter
-      if (searchQuery) {
-        query = query.ilike("title", `%${searchQuery}%`);
+      if (debouncedSearch) {
+        query = query.ilike("title", `%${debouncedSearch}%`);
       }
 
       // Apply price range filter
@@ -77,7 +86,6 @@ const ProductGrid = () => {
         console.error("Error fetching products:", error);
         throw error;
       }
-      console.log("Fetched products:", data);
       return data;
     },
   });
