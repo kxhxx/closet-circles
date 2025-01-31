@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import Navbar from "@/components/Navbar";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { useEffect } from "react";
 
 const ProductDetail = () => {
@@ -150,7 +150,7 @@ const ProductDetail = () => {
                   <Button 
                     variant="ghost" 
                     className="flex items-center gap-4 flex-1"
-                    onClick={() => navigate('/profile')}
+                    onClick={() => navigate(`/profile/${profile?.username}`)}
                   >
                     <div className="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
                       {profile?.profile_picture ? (
