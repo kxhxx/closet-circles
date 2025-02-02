@@ -1,5 +1,6 @@
 import { Menu, Search, ShoppingBag } from "lucide-react";
 import { Button } from "./ui/button";
+import { SignUpDialog } from "./auth/SignUpDialog";
 
 const Navbar = () => {
   return (
@@ -29,9 +30,7 @@ const Navbar = () => {
           <Button variant="ghost" size="icon">
             <ShoppingBag className="h-6 w-6" />
           </Button>
-          <Button className="bg-black text-white hover:bg-gray-800">
-            Sign up
-          </Button>
+          <SignUpDialog />
         </div>
       </div>
     </nav>
