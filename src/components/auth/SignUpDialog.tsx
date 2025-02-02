@@ -12,7 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 export function SignUpDialog() {
   const [email, setEmail] = useState("");
@@ -22,8 +22,27 @@ export function SignUpDialog() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  const validatePassword = (password: string) => {
+    if (password.length < 6) {
+      return "Password must be at least 6 characters long";
+    }
+    return null;
+  };
+
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate password before submission
+    const passwordError = validatePassword(password);
+    if (passwordError) {
+      toast({
+        variant: "destructive",
+        title: "Invalid Password",
+        description: passwordError,
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -81,7 +100,7 @@ export function SignUpDialog() {
         <DialogHeader>
           <DialogTitle>Create an account</DialogTitle>
           <DialogDescription>
-            Enter your email and password to create your account.
+            Enter your email and password to create your account. Password must be at least 6 characters long.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSignUp} className="space-y-4 mt-4">
@@ -101,10 +120,11 @@ export function SignUpDialog() {
             <Input
               id="password"
               type="password"
-              placeholder="Enter your password"
+              placeholder="Enter your password (min. 6 characters)"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              minLength={6}
             />
           </div>
           <Button
