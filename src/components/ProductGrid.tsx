@@ -41,7 +41,7 @@ const ProductGrid = () => {
         query = query.ilike("title", `%${debouncedSearch}%`);
       }
 
-      // Apply price range filter
+      // Apply price range filter (Note: price ranges are in USD, we convert to INR for display)
       if (priceRange !== "all") {
         switch (priceRange) {
           case "0-50":
@@ -100,6 +100,11 @@ const ProductGrid = () => {
     "home",
   ];
 
+  // Convert USD to INR
+  const convertToINR = (usdPrice: number) => {
+    return Math.round(usdPrice * 83); // Using a fixed conversion rate of 1 USD = 83 INR
+  };
+
   if (isLoading) {
     return <div>Loading...</div>;
   }
@@ -149,10 +154,10 @@ const ProductGrid = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Prices</SelectItem>
-                <SelectItem value="0-50">$0 - $50</SelectItem>
-                <SelectItem value="51-100">$51 - $100</SelectItem>
-                <SelectItem value="101-200">$101 - $200</SelectItem>
-                <SelectItem value="200+">$200+</SelectItem>
+                <SelectItem value="0-50">₹0 - ₹4,150</SelectItem>
+                <SelectItem value="51-100">₹4,151 - ₹8,300</SelectItem>
+                <SelectItem value="101-200">₹8,301 - ₹16,600</SelectItem>
+                <SelectItem value="200+">₹16,600+</SelectItem>
               </SelectContent>
             </Select>
 
@@ -191,7 +196,7 @@ const ProductGrid = () => {
                 <div className="mt-2">
                   <div className="flex justify-between">
                     <div className="flex gap-2">
-                      <span className="text-lg font-medium">${product.price}</span>
+                      <span className="text-lg font-medium">₹{convertToINR(product.price).toLocaleString('en-IN')}</span>
                     </div>
                     <span className="text-sm text-gray-500">
                       {product.category}
