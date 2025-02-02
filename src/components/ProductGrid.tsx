@@ -1,17 +1,9 @@
-import { Heart } from "lucide-react";
-import { Button } from "./ui/button";
-import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";
-import { Input } from "./ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "./ui/select";
+import SearchBar from "./product/SearchBar";
+import ProductFilters from "./product/ProductFilters";
+import ProductCard from "./product/ProductCard";
 
 const ProductGrid = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -20,11 +12,10 @@ const ProductGrid = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
 
-  // Debounce search query
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchQuery);
-    }, 500); // Wait for 500ms after the user stops typing
+    }, 500);
 
     return () => clearTimeout(timer);
   }, [searchQuery]);
@@ -32,16 +23,12 @@ const ProductGrid = () => {
   const { data: products, isLoading } = useQuery({
     queryKey: ["products", debouncedSearch, priceRange, selectedCategory, sortBy],
     queryFn: async () => {
-      let query = supabase
-        .from("items")
-        .select("*");
+      let query = supabase.from("items").select("*");
 
-      // Apply search filter
       if (debouncedSearch) {
         query = query.ilike("title", `%${debouncedSearch}%`);
       }
 
-      // Apply price range filter (Note: price ranges are in USD, we convert to INR for display)
       if (priceRange !== "all") {
         switch (priceRange) {
           case "0-50":
@@ -59,12 +46,10 @@ const ProductGrid = () => {
         }
       }
 
-      // Apply category filter
       if (selectedCategory !== "all") {
         query = query.eq("category", selectedCategory);
       }
 
-      // Apply sorting
       switch (sortBy) {
         case "newest":
           query = query.order("created_at", { ascending: false });
@@ -90,21 +75,6 @@ const ProductGrid = () => {
     },
   });
 
-  const categories = [
-    "all",
-    "clothes",
-    "jewelry",
-    "accessories",
-    "electronics",
-    "books",
-    "home",
-  ];
-
-  // Convert USD to INR
-  const convertToINR = (usdPrice: number) => {
-    return Math.round(usdPrice * 83); // Using a fixed conversion rate of 1 USD = 83 INR
-  };
-
   if (isLoading) {
     return <div>Loading...</div>;
   }
@@ -124,96 +94,26 @@ const ProductGrid = () => {
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <h2 className="text-2xl font-bold">Browse Repop</h2>
             <div className="w-full md:w-auto">
-              <Input
-                type="search"
-                placeholder="Search products..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full md:w-80"
+              <SearchBar
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
               />
             </div>
           </div>
           
-          <div className="flex flex-wrap gap-4">
-            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Category" />
-              </SelectTrigger>
-              <SelectContent>
-                {categories.map((category) => (
-                  <SelectItem key={category} value={category}>
-                    {category.charAt(0).toUpperCase() + category.slice(1)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select value={priceRange} onValueChange={setPriceRange}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Price Range" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Prices</SelectItem>
-                <SelectItem value="0-50">₹0 - ₹4,150</SelectItem>
-                <SelectItem value="51-100">₹4,151 - ₹8,300</SelectItem>
-                <SelectItem value="101-200">₹8,301 - ₹16,600</SelectItem>
-                <SelectItem value="200+">₹16,600+</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Sort By" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="newest">Newest First</SelectItem>
-                <SelectItem value="oldest">Oldest First</SelectItem>
-                <SelectItem value="price-high">Price: High to Low</SelectItem>
-                <SelectItem value="price-low">Price: Low to High</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          <ProductFilters
+            selectedCategory={selectedCategory}
+            setSelectedCategory={setSelectedCategory}
+            priceRange={priceRange}
+            setPriceRange={setPriceRange}
+            sortBy={sortBy}
+            setSortBy={setSortBy}
+          />
         </div>
         
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {products.map((product) => (
-            <Link key={product.id} to={`/product/${product.id}`}>
-              <div className="group relative">
-                <div className="aspect-square overflow-hidden rounded-lg bg-gray-100">
-                  <img
-                    src="/lovable-uploads/bd4bead3-ca1c-4e4f-883b-fffa05c64b81.png"
-                    alt={product.title}
-                    className="h-full w-full object-cover object-center"
-                  />
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="absolute top-2 right-2 bg-white/80 backdrop-blur-sm hover:bg-white"
-                  >
-                    <Heart className="h-5 w-5" />
-                  </Button>
-                </div>
-                <div className="mt-2">
-                  <div className="flex justify-between">
-                    <div className="flex gap-2">
-                      <span className="text-lg font-medium">₹{convertToINR(product.price).toLocaleString('en-IN')}</span>
-                    </div>
-                    <span className="text-sm text-gray-500">
-                      {product.category}
-                    </span>
-                  </div>
-                  <h3 className="text-sm text-gray-700">{product.title}</h3>
-                  <div className="mt-2 flex gap-2">
-                    <Button variant="outline" size="sm" className="w-full">
-                      Add to Cart
-                    </Button>
-                    <Button variant="default" size="sm" className="w-full">
-                      Buy Now
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </Link>
+            <ProductCard key={product.id} product={product} />
           ))}
         </div>
       </div>
