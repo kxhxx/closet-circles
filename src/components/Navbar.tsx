@@ -1,6 +1,8 @@
 import { Menu, Search, ShoppingBag } from "lucide-react";
 import { Button } from "./ui/button";
 import { SignUpDialog } from "./auth/SignUpDialog";
+import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
+import Cart from "@/pages/Cart";
 
 const Navbar = () => {
   return (
@@ -27,9 +29,16 @@ const Navbar = () => {
         </div>
 
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon">
-            <ShoppingBag className="h-6 w-6" />
-          </Button>
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <ShoppingBag className="h-6 w-6" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent className="w-full sm:max-w-lg p-0">
+              <Cart />
+            </SheetContent>
+          </Sheet>
           <SignUpDialog />
         </div>
       </div>
