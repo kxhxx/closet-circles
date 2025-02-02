@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import Navbar from "@/components/Navbar";
+import { MessageDialog } from "@/components/messages/MessageDialog";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -154,13 +155,16 @@ const Profile = () => {
                     Edit Profile
                   </Button>
                 ) : (
-                  <Button variant="outline">
-                    Follow
-                  </Button>
+                  <>
+                    <Button variant="outline">
+                      Follow
+                    </Button>
+                    <MessageDialog 
+                      recipientId={profile.id} 
+                      recipientName={profile.username}
+                    />
+                  </>
                 )}
-                <Button variant="outline" size="icon">
-                  <Mail className="h-4 w-4" />
-                </Button>
               </div>
             </div>
             
