@@ -1,32 +1,28 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import SearchBar from "./product/SearchBar";
 import ProductFilters from "./product/ProductFilters";
 import ProductCard from "./product/ProductCard";
 
 const ProductGrid = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [activeSearch, setActiveSearch] = useState("");
   const [priceRange, setPriceRange] = useState("all");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(searchQuery);
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
+  const handleSearch = (query: string) => {
+    setActiveSearch(query);
+  };
 
   const { data: products, isLoading } = useQuery({
-    queryKey: ["products", debouncedSearch, priceRange, selectedCategory, sortBy],
+    queryKey: ["products", activeSearch, priceRange, selectedCategory, sortBy],
     queryFn: async () => {
       let query = supabase.from("items").select("*");
 
-      if (debouncedSearch) {
-        query = query.ilike("title", `%${debouncedSearch}%`);
+      if (activeSearch) {
+        query = query.ilike("title", `%${activeSearch}%`);
       }
 
       if (priceRange !== "all") {
@@ -97,6 +93,7 @@ const ProductGrid = () => {
               <SearchBar
                 searchQuery={searchQuery}
                 setSearchQuery={setSearchQuery}
+                onSearch={handleSearch}
               />
             </div>
           </div>

@@ -3,8 +3,19 @@ import { Button } from "./ui/button";
 import { SignUpDialog } from "./auth/SignUpDialog";
 import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
 import Cart from "@/pages/Cart";
+import { useState } from "react";
 
 const Navbar = () => {
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      // Handle search logic here
+      console.log('Searching for:', searchQuery);
+    }
+  };
+
   return (
     <nav className="border-b">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
@@ -23,6 +34,9 @@ const Navbar = () => {
             <input
               type="search"
               placeholder="Search User"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={handleSearch}
               className="w-full pl-10 pr-4 py-2 bg-gray-100 rounded-full focus:outline-none focus:ring-2 focus:ring-depop-red"
             />
           </div>
