@@ -1,9 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
-import SearchBar from "./product/SearchBar";
-import ProductFilters from "./product/ProductFilters";
-import ProductCard from "./product/ProductCard";
+import FilterSection from "./product/FilterSection";
+import ProductList from "./product/ProductList";
 
 const ProductGrid = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -75,44 +74,21 @@ const ProductGrid = () => {
     return <div>Loading...</div>;
   }
 
-  if (!products || products.length === 0) {
-    return (
-      <div className="text-center py-12">
-        <p className="text-gray-500">No products available</p>
-      </div>
-    );
-  }
-
   return (
     <section className="py-8">
       <div className="container mx-auto px-4">
-        <div className="flex flex-col gap-6 mb-8">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <h2 className="text-2xl font-bold">Browse Repop</h2>
-            <div className="w-full md:w-auto">
-              <SearchBar
-                searchQuery={searchQuery}
-                setSearchQuery={setSearchQuery}
-                onSearch={handleSearch}
-              />
-            </div>
-          </div>
-          
-          <ProductFilters
-            selectedCategory={selectedCategory}
-            setSelectedCategory={setSelectedCategory}
-            priceRange={priceRange}
-            setPriceRange={setPriceRange}
-            sortBy={sortBy}
-            setSortBy={setSortBy}
-          />
-        </div>
-        
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+        <FilterSection
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          onSearch={handleSearch}
+          selectedCategory={selectedCategory}
+          setSelectedCategory={setSelectedCategory}
+          priceRange={priceRange}
+          setPriceRange={setPriceRange}
+          sortBy={sortBy}
+          setSortBy={setSortBy}
+        />
+        <ProductList products={products || []} />
       </div>
     </section>
   );
