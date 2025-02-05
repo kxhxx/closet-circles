@@ -19,7 +19,7 @@ export function SignUpDialog() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
-  const [isLogin, setIsLogin] = useState(true); // Default to login view
+  const [isLogin, setIsLogin] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -68,8 +68,8 @@ export function SignUpDialog() {
     try {
       if (isLogin) {
         const { data, error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
+          email: email.trim(),
+          password: password.trim(),
         });
 
         if (error) {
@@ -86,18 +86,18 @@ export function SignUpDialog() {
               description: error.message,
             });
           }
-        } else {
+        } else if (data.user) {
           toast({
             title: "Success!",
             description: "You have been logged in.",
           });
           setOpen(false);
-          navigate("/"); // Redirect to home page after successful login
+          navigate("/");
         }
       } else {
         const { data, error } = await supabase.auth.signUp({
-          email,
-          password,
+          email: email.trim(),
+          password: password.trim(),
         });
 
         if (error) {
@@ -107,7 +107,7 @@ export function SignUpDialog() {
               title: "Sign Up Failed",
               description: "This email is already registered. Please try logging in instead.",
             });
-            setIsLogin(true); // Switch to login view
+            setIsLogin(true);
           } else {
             toast({
               variant: "destructive",
@@ -115,37 +115,35 @@ export function SignUpDialog() {
               description: error.message,
             });
           }
-        } else {
-          if (data.user) {
-            const { error: profileError } = await supabase
-              .from('profiles')
-              .insert([
-                {
-                  id: data.user.id,
-                  username: email.split('@')[0],
-                  user_id: data.user.id,
-                  bio: null,
-                  profile_picture: null,
-                  followers_count: 0,
-                  following_count: 0,
-                  ratings_count: 0
-                }
-              ]);
+        } else if (data.user) {
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .insert([
+              {
+                id: data.user.id,
+                username: email.split('@')[0],
+                user_id: data.user.id,
+                bio: null,
+                profile_picture: null,
+                followers_count: 0,
+                following_count: 0,
+                ratings_count: 0
+              }
+            ]);
 
-            if (profileError) {
-              console.error('Error creating profile:', profileError);
-              toast({
-                variant: "destructive",
-                title: "Error",
-                description: "Failed to create user profile",
-              });
-            } else {
-              toast({
-                title: "Success!",
-                description: "Please check your email to confirm your account.",
-              });
-              setOpen(false);
-            }
+          if (profileError) {
+            console.error('Error creating profile:', profileError);
+            toast({
+              variant: "destructive",
+              title: "Error",
+              description: "Failed to create user profile",
+            });
+          } else {
+            toast({
+              title: "Success!",
+              description: "Please check your email to confirm your account.",
+            });
+            setOpen(false);
           }
         }
       }
