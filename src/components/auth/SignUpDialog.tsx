@@ -19,6 +19,7 @@ export function SignUpDialog() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
+  const [isLogin, setIsLogin] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -29,64 +30,86 @@ export function SignUpDialog() {
     return null;
   };
 
-  const handleSignUp = async (e: React.FormEvent) => {
+  const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    const passwordError = validatePassword(password);
-    if (passwordError) {
-      toast({
-        variant: "destructive",
-        title: "Invalid Password",
-        description: passwordError,
-      });
-      return;
+    if (!isLogin) {
+      const passwordError = validatePassword(password);
+      if (passwordError) {
+        toast({
+          variant: "destructive",
+          title: "Invalid Password",
+          description: passwordError,
+        });
+        return;
+      }
     }
 
     setLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-      });
-
-      if (error) {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: error.message,
+      if (isLogin) {
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
         });
-      } else {
-        // Create a profile for the user
-        if (data.user) {
-          const { error: profileError } = await supabase
-            .from('profiles')
-            .insert([
-              {
-                id: data.user.id,
-                username: email.split('@')[0],
-                user_id: data.user.id,
-                bio: null,
-                profile_picture: null,
-                followers_count: 0,
-                following_count: 0,
-                ratings_count: 0
-              }
-            ]);
 
-          if (profileError) {
-            console.error('Error creating profile:', profileError);
-            toast({
-              variant: "destructive",
-              title: "Error",
-              description: "Failed to create user profile",
-            });
-          } else {
-            toast({
-              title: "Success!",
-              description: "Please check your email to confirm your account.",
-            });
-            setOpen(false);
+        if (error) {
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: error.message,
+          });
+        } else {
+          toast({
+            title: "Success!",
+            description: "You have been logged in.",
+          });
+          setOpen(false);
+        }
+      } else {
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+        });
+
+        if (error) {
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: error.message,
+          });
+        } else {
+          if (data.user) {
+            const { error: profileError } = await supabase
+              .from('profiles')
+              .insert([
+                {
+                  id: data.user.id,
+                  username: email.split('@')[0],
+                  user_id: data.user.id,
+                  bio: null,
+                  profile_picture: null,
+                  followers_count: 0,
+                  following_count: 0,
+                  ratings_count: 0
+                }
+              ]);
+
+            if (profileError) {
+              console.error('Error creating profile:', profileError);
+              toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Failed to create user profile",
+              });
+            } else {
+              toast({
+                title: "Success!",
+                description: "Please check your email to confirm your account.",
+              });
+              setOpen(false);
+            }
           }
         }
       }
@@ -104,16 +127,21 @@ export function SignUpDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-black text-white hover:bg-gray-800">Sign up</Button>
+        <Button className="bg-black text-white hover:bg-gray-800">
+          {isLogin ? "Log in" : "Sign up"}
+        </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Create an account</DialogTitle>
+          <DialogTitle>{isLogin ? "Log in to your account" : "Create an account"}</DialogTitle>
           <DialogDescription>
-            Enter your email and password to create your account. Password must be at least 6 characters long.
+            {isLogin 
+              ? "Enter your email and password to log in."
+              : "Enter your email and password to create your account. Password must be at least 6 characters long."
+            }
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSignUp} className="space-y-4 mt-4">
+        <form onSubmit={handleAuth} className="space-y-4 mt-4">
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input
@@ -130,7 +158,7 @@ export function SignUpDialog() {
             <Input
               id="password"
               type="password"
-              placeholder="Enter your password (min. 6 characters)"
+              placeholder="Enter your password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -142,8 +170,23 @@ export function SignUpDialog() {
             className="w-full bg-black text-white hover:bg-gray-800"
             disabled={loading}
           >
-            {loading ? "Creating account..." : "Create account"}
+            {loading 
+              ? (isLogin ? "Logging in..." : "Creating account...") 
+              : (isLogin ? "Log in" : "Create account")
+            }
           </Button>
+          <div className="text-center">
+            <button
+              type="button"
+              onClick={() => setIsLogin(!isLogin)}
+              className="text-sm text-gray-600 hover:underline"
+            >
+              {isLogin 
+                ? "Don't have an account? Sign up" 
+                : "Already have an account? Log in"
+              }
+            </button>
+          </div>
         </form>
       </DialogContent>
     </Dialog>
