@@ -4,14 +4,16 @@ import { SignUpDialog } from "./auth/SignUpDialog";
 import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
 import Cart from "@/pages/Cart";
 import { useState } from "react";
+import { SidebarProvider } from "./ui/sidebar";
+import NavigationPanel from "./NavigationPanel";
 
 const Navbar = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [isNavOpen, setIsNavOpen] = useState(false);
 
   const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      // Handle search logic here
       console.log('Searching for:', searchQuery);
     }
   };
@@ -20,9 +22,18 @@ const Navbar = () => {
     <nav className="border-b">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon">
-            <Menu className="h-6 w-6" />
-          </Button>
+          <Sheet open={isNavOpen} onOpenChange={setIsNavOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <Menu className="h-6 w-6" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="p-0 w-64">
+              <SidebarProvider defaultOpen>
+                <NavigationPanel />
+              </SidebarProvider>
+            </SheetContent>
+          </Sheet>
           <a href="/" className="text-depop-red font-bold text-2xl">
             repop
           </a>
