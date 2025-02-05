@@ -19,9 +19,17 @@ export function SignUpDialog() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
-  const [isLogin, setIsLogin] = useState(false);
+  const [isLogin, setIsLogin] = useState(true); // Default to login view
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return "Please enter a valid email address";
+    }
+    return null;
+  };
 
   const validatePassword = (password: string) => {
     if (password.length < 6) {
@@ -33,16 +41,26 @@ export function SignUpDialog() {
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!isLogin) {
-      const passwordError = validatePassword(password);
-      if (passwordError) {
-        toast({
-          variant: "destructive",
-          title: "Invalid Password",
-          description: passwordError,
-        });
-        return;
-      }
+    // Validate email
+    const emailError = validateEmail(email);
+    if (emailError) {
+      toast({
+        variant: "destructive",
+        title: "Invalid Email",
+        description: emailError,
+      });
+      return;
+    }
+
+    // Validate password
+    const passwordError = validatePassword(password);
+    if (!isLogin && passwordError) {
+      toast({
+        variant: "destructive",
+        title: "Invalid Password",
+        description: passwordError,
+      });
+      return;
     }
 
     setLoading(true);
@@ -55,17 +73,26 @@ export function SignUpDialog() {
         });
 
         if (error) {
-          toast({
-            variant: "destructive",
-            title: "Error",
-            description: error.message,
-          });
+          if (error.message === "Invalid login credentials") {
+            toast({
+              variant: "destructive",
+              title: "Login Failed",
+              description: "Invalid email or password. Please try again.",
+            });
+          } else {
+            toast({
+              variant: "destructive",
+              title: "Error",
+              description: error.message,
+            });
+          }
         } else {
           toast({
             title: "Success!",
             description: "You have been logged in.",
           });
           setOpen(false);
+          navigate("/"); // Redirect to home page after successful login
         }
       } else {
         const { data, error } = await supabase.auth.signUp({
@@ -74,11 +101,20 @@ export function SignUpDialog() {
         });
 
         if (error) {
-          toast({
-            variant: "destructive",
-            title: "Error",
-            description: error.message,
-          });
+          if (error.message.includes("User already registered")) {
+            toast({
+              variant: "destructive",
+              title: "Sign Up Failed",
+              description: "This email is already registered. Please try logging in instead.",
+            });
+            setIsLogin(true); // Switch to login view
+          } else {
+            toast({
+              variant: "destructive",
+              title: "Error",
+              description: error.message,
+            });
+          }
         } else {
           if (data.user) {
             const { error: profileError } = await supabase
