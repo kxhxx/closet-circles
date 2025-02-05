@@ -41,8 +41,11 @@ export function SignUpDialog() {
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    const trimmedEmail = email.trim();
+    const trimmedPassword = password.trim();
+
     // Validate email
-    const emailError = validateEmail(email);
+    const emailError = validateEmail(trimmedEmail);
     if (emailError) {
       toast({
         variant: "destructive",
@@ -53,7 +56,7 @@ export function SignUpDialog() {
     }
 
     // Validate password
-    const passwordError = validatePassword(password);
+    const passwordError = validatePassword(trimmedPassword);
     if (!isLogin && passwordError) {
       toast({
         variant: "destructive",
@@ -68,12 +71,19 @@ export function SignUpDialog() {
     try {
       if (isLogin) {
         const { data, error } = await supabase.auth.signInWithPassword({
-          email: email.trim(),
-          password: password.trim(),
+          email: trimmedEmail,
+          password: trimmedPassword,
         });
 
         if (error) {
-          if (error.message === "Invalid login credentials") {
+          console.error('Auth error:', error);
+          if (error.message === "Email not confirmed") {
+            toast({
+              variant: "destructive",
+              title: "Email Not Confirmed",
+              description: "Please check your email and confirm your account before logging in.",
+            });
+          } else if (error.message === "Invalid login credentials") {
             toast({
               variant: "destructive",
               title: "Login Failed",
@@ -96,11 +106,12 @@ export function SignUpDialog() {
         }
       } else {
         const { data, error } = await supabase.auth.signUp({
-          email: email.trim(),
-          password: password.trim(),
+          email: trimmedEmail,
+          password: trimmedPassword,
         });
 
         if (error) {
+          console.error('Signup error:', error);
           if (error.message.includes("User already registered")) {
             toast({
               variant: "destructive",
@@ -121,7 +132,7 @@ export function SignUpDialog() {
             .insert([
               {
                 id: data.user.id,
-                username: email.split('@')[0],
+                username: trimmedEmail.split('@')[0],
                 user_id: data.user.id,
                 bio: null,
                 profile_picture: null,
@@ -148,6 +159,7 @@ export function SignUpDialog() {
         }
       }
     } catch (error) {
+      console.error('Unexpected error:', error);
       toast({
         variant: "destructive",
         title: "Error",
