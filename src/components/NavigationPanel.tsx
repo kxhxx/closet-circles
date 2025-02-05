@@ -2,13 +2,13 @@ import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
-  SidebarGroupContent,
   SidebarGroupLabel,
+  SidebarGroupContent,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { Home, Search, MessageCircle, User, Heart } from "lucide-react";
+import { Home, MessageCircle, Heart } from "lucide-react";
 
 const navigationItems = [
   {
@@ -17,19 +17,9 @@ const navigationItems = [
     icon: Home,
   },
   {
-    title: "Search",
-    url: "/search",
-    icon: Search,
-  },
-  {
     title: "Messages",
     url: "/messages",
     icon: MessageCircle,
-  },
-  {
-    title: "Profile",
-    url: "/profile",
-    icon: User,
   },
   {
     title: "Favorites",

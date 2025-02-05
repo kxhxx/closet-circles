@@ -32,7 +32,6 @@ export function SignUpDialog() {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validate password before submission
     const passwordError = validatePassword(password);
     if (passwordError) {
       toast({
@@ -58,11 +57,6 @@ export function SignUpDialog() {
           description: error.message,
         });
       } else {
-        toast({
-          title: "Success!",
-          description: "Please check your email to confirm your account.",
-        });
-        setOpen(false);
         // Create a profile for the user
         if (data.user) {
           const { error: profileError } = await supabase
@@ -72,11 +66,27 @@ export function SignUpDialog() {
                 id: data.user.id,
                 username: email.split('@')[0],
                 user_id: data.user.id,
+                bio: null,
+                profile_picture: null,
+                followers_count: 0,
+                following_count: 0,
+                ratings_count: 0
               }
             ]);
 
           if (profileError) {
             console.error('Error creating profile:', profileError);
+            toast({
+              variant: "destructive",
+              title: "Error",
+              description: "Failed to create user profile",
+            });
+          } else {
+            toast({
+              title: "Success!",
+              description: "Please check your email to confirm your account.",
+            });
+            setOpen(false);
           }
         }
       }
