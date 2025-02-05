@@ -1,7 +1,8 @@
-import { VariantProps } from "class-variance-authority"
+import { type VariantProps } from "class-variance-authority"
+import { type TooltipContentProps } from "@radix-ui/react-tooltip"
 import { sidebarMenuButtonVariants } from "./variants"
 
-export type SidebarContext = {
+export type SidebarContextType = {
   state: "expanded" | "collapsed"
   open: boolean
   setOpen: (open: boolean) => void
@@ -14,5 +15,5 @@ export type SidebarContext = {
 export type SidebarMenuButtonProps = React.ComponentProps<"button"> & {
   asChild?: boolean
   isActive?: boolean
-  tooltip?: string | React.ComponentProps<typeof TooltipContent>
+  tooltip?: string | TooltipContentProps
 } & VariantProps<typeof sidebarMenuButtonVariants>
