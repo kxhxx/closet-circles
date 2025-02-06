@@ -77,13 +77,13 @@ export function SignUpDialog() {
 
         if (error) {
           console.error('Auth error:', error);
-          if (error.message === "Email not confirmed") {
+          if (error.message.includes("Email not confirmed")) {
             toast({
               variant: "destructive",
               title: "Email Not Confirmed",
-              description: "Please check your email and confirm your account before logging in.",
+              description: "Please check your email and click the confirmation link before logging in. If you can't find the email, check your spam folder.",
             });
-          } else if (error.message === "Invalid login credentials") {
+          } else if (error.message.includes("Invalid login credentials")) {
             toast({
               variant: "destructive",
               title: "Login Failed",
@@ -152,7 +152,7 @@ export function SignUpDialog() {
           } else {
             toast({
               title: "Success!",
-              description: "Please check your email to confirm your account.",
+              description: "Please check your email to confirm your account. The confirmation email might take a few minutes to arrive. Check your spam folder if you don't see it.",
             });
             setOpen(false);
           }
@@ -182,8 +182,8 @@ export function SignUpDialog() {
           <DialogTitle>{isLogin ? "Log in to your account" : "Create an account"}</DialogTitle>
           <DialogDescription>
             {isLogin 
-              ? "Enter your email and password to log in."
-              : "Enter your email and password to create your account. Password must be at least 6 characters long."
+              ? "Enter your email and password to log in. Make sure you've confirmed your email address."
+              : "Enter your email and password to create your account. You'll need to confirm your email address before logging in."
             }
           </DialogDescription>
         </DialogHeader>
