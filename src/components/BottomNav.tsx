@@ -7,20 +7,46 @@ import { supabase } from "@/integrations/supabase/client";
 const BottomNav = () => {
   const location = useLocation();
   const [userId, setUserId] = useState<string | null>(null);
+  const [username, setUsername] = useState<string | null>(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUserId(session?.user?.id || null);
+      if (session?.user?.id) {
+        fetchUserProfile(session.user.id);
+      }
     });
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setUserId(session?.user?.id || null);
+      if (session?.user?.id) {
+        fetchUserProfile(session.user.id);
+      } else {
+        setUsername(null);
+      }
     });
 
     return () => subscription.unsubscribe();
   }, []);
+
+  const fetchUserProfile = async (uid: string) => {
+    const { data: profile, error } = await supabase
+      .from('profiles')
+      .select('username')
+      .eq('id', uid)
+      .single();
+
+    if (error) {
+      console.error('Error fetching profile:', error);
+      return;
+    }
+
+    if (profile) {
+      setUsername(profile.username);
+    }
+  };
 
   const navigationItems = [
     {
@@ -45,7 +71,7 @@ const BottomNav = () => {
     },
     {
       title: "Profile",
-      url: userId ? `/profile/${userId}` : "/auth",
+      url: userId && username ? `/profile/${username}` : "/auth",
       icon: User,
     },
   ];
