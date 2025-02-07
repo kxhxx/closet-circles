@@ -44,8 +44,8 @@ const Messages = () => {
           id,
           content,
           sent_at,
-          sender:sender_id(username, profile_picture),
-          receiver:receiver_id(username, profile_picture)
+          sender:profiles!messages_sender_id_fkey(username, profile_picture),
+          receiver:profiles!messages_receiver_id_fkey(username, profile_picture)
         `)
         .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
         .order("sent_at", { ascending: false });
