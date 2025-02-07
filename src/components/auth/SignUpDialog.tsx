@@ -70,20 +70,20 @@ export function SignUpDialog() {
 
     try {
       if (isLogin) {
-        const { data, error } = await supabase.auth.signInWithPassword({
+        const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
           email: trimmedEmail,
           password: trimmedPassword,
         });
 
-        if (error) {
-          console.error('Auth error:', error);
-          if (error.message.includes("Email not confirmed")) {
+        if (authError) {
+          console.error('Auth error:', authError);
+          if (authError.message.includes("Email not confirmed")) {
             toast({
               variant: "destructive",
               title: "Email Not Confirmed",
               description: "Please check your email and click the confirmation link before logging in. If you can't find the email, check your spam folder.",
             });
-          } else if (error.message.includes("Invalid login credentials")) {
+          } else if (authError.message.includes("Invalid login credentials")) {
             toast({
               variant: "destructive",
               title: "Login Failed",
@@ -93,16 +93,32 @@ export function SignUpDialog() {
             toast({
               variant: "destructive",
               title: "Error",
-              description: error.message,
+              description: authError.message,
             });
           }
-        } else if (data.user) {
-          toast({
-            title: "Success!",
-            description: "You have been logged in.",
-          });
-          setOpen(false);
-          navigate("/");
+        } else if (authData.user) {
+          // Fetch the user's profile to get their username for redirection
+          const { data: profileData, error: profileError } = await supabase
+            .from('profiles')
+            .select('username')
+            .eq('id', authData.user.id)
+            .single();
+
+          if (profileError) {
+            console.error('Profile fetch error:', profileError);
+            toast({
+              variant: "destructive",
+              title: "Error",
+              description: "Failed to fetch user profile",
+            });
+          } else {
+            toast({
+              title: "Success!",
+              description: "You have been logged in.",
+            });
+            setOpen(false);
+            navigate(`/profile/${profileData.username}`);
+          }
         }
       } else {
         const { data, error } = await supabase.auth.signUp({
