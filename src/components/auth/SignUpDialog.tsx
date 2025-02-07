@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -9,10 +8,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { validateEmail, validatePassword } from "@/utils/authValidation";
+import { authService } from "@/services/authService";
+import { AuthForm } from "./AuthForm";
 
 export function SignUpDialog() {
   const [email, setEmail] = useState("");
@@ -23,28 +23,12 @@ export function SignUpDialog() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const validateEmail = (email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return "Please enter a valid email address";
-    }
-    return null;
-  };
-
-  const validatePassword = (password: string) => {
-    if (password.length < 6) {
-      return "Password must be at least 6 characters long";
-    }
-    return null;
-  };
-
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     
     const trimmedEmail = email.trim();
     const trimmedPassword = password.trim();
 
-    // Validate email
     const emailError = validateEmail(trimmedEmail);
     if (emailError) {
       toast({
@@ -55,7 +39,6 @@ export function SignUpDialog() {
       return;
     }
 
-    // Validate password
     const passwordError = validatePassword(trimmedPassword);
     if (!isLogin && passwordError) {
       toast({
@@ -70,108 +53,20 @@ export function SignUpDialog() {
 
     try {
       if (isLogin) {
-        const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-          email: trimmedEmail,
-          password: trimmedPassword,
-        });
+        const { data: authData, error: authError } = await authService.signIn(trimmedEmail, trimmedPassword);
 
         if (authError) {
-          console.error('Auth error:', authError);
-          if (authError.message.includes("Email not confirmed")) {
-            toast({
-              variant: "destructive",
-              title: "Email Not Confirmed",
-              description: "Please check your email and click the confirmation link before logging in. If you can't find the email, check your spam folder.",
-            });
-          } else if (authError.message.includes("Invalid login credentials")) {
-            toast({
-              variant: "destructive",
-              title: "Login Failed",
-              description: "Invalid email or password. Please try again.",
-            });
-          } else {
-            toast({
-              variant: "destructive",
-              title: "Error",
-              description: authError.message,
-            });
-          }
+          handleAuthError(authError);
         } else if (authData.user) {
-          // Fetch the user's profile to get their username for redirection
-          const { data: profileData, error: profileError } = await supabase
-            .from('profiles')
-            .select('username')
-            .eq('id', authData.user.id)
-            .single();
-
-          if (profileError) {
-            console.error('Profile fetch error:', profileError);
-            toast({
-              variant: "destructive",
-              title: "Error",
-              description: "Failed to fetch user profile",
-            });
-          } else {
-            toast({
-              title: "Success!",
-              description: "You have been logged in.",
-            });
-            setOpen(false);
-            navigate(`/profile/${profileData.username}`);
-          }
+          await handleSuccessfulLogin(authData.user.id);
         }
       } else {
-        const { data, error } = await supabase.auth.signUp({
-          email: trimmedEmail,
-          password: trimmedPassword,
-        });
+        const { data, error } = await authService.signUp(trimmedEmail, trimmedPassword);
 
         if (error) {
-          console.error('Signup error:', error);
-          if (error.message.includes("User already registered")) {
-            toast({
-              variant: "destructive",
-              title: "Sign Up Failed",
-              description: "This email is already registered. Please try logging in instead.",
-            });
-            setIsLogin(true);
-          } else {
-            toast({
-              variant: "destructive",
-              title: "Error",
-              description: error.message,
-            });
-          }
+          handleSignUpError(error);
         } else if (data.user) {
-          const { error: profileError } = await supabase
-            .from('profiles')
-            .insert([
-              {
-                id: data.user.id,
-                username: trimmedEmail.split('@')[0],
-                user_id: data.user.id,
-                bio: null,
-                profile_picture: null,
-                followers_count: 0,
-                following_count: 0,
-                ratings_count: 0
-              }
-            ]);
-
-          if (profileError) {
-            console.error('Error creating profile:', profileError);
-            toast({
-              variant: "destructive",
-              title: "Error",
-              description: "Failed to create user profile",
-            });
-          } else {
-            toast({
-              title: "Success!",
-              description: "Please check your email to confirm your account. The confirmation email might take a few minutes to arrive. Check your spam folder if you don't see it.",
-            });
-            setOpen(false);
-          }
+          await handleSuccessfulSignUp(data.user);
         }
       }
     } catch (error) {
@@ -183,6 +78,89 @@ export function SignUpDialog() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleAuthError = (error: any) => {
+    console.error('Auth error:', error);
+    if (error.message.includes("Email not confirmed")) {
+      toast({
+        variant: "destructive",
+        title: "Email Not Confirmed",
+        description: "Please check your email and click the confirmation link before logging in. If you can't find the email, check your spam folder.",
+      });
+    } else if (error.message.includes("Invalid login credentials")) {
+      toast({
+        variant: "destructive",
+        title: "Login Failed",
+        description: "Invalid email or password. Please try again.",
+      });
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message,
+      });
+    }
+  };
+
+  const handleSignUpError = (error: any) => {
+    console.error('Signup error:', error);
+    if (error.message.includes("User already registered")) {
+      toast({
+        variant: "destructive",
+        title: "Sign Up Failed",
+        description: "This email is already registered. Please try logging in instead.",
+      });
+      setIsLogin(true);
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message,
+      });
+    }
+  };
+
+  const handleSuccessfulLogin = async (userId: string) => {
+    const { data: profileData, error: profileError } = await authService.fetchUserProfile(userId);
+
+    if (profileError) {
+      console.error('Profile fetch error:', profileError);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to fetch user profile",
+      });
+    } else {
+      toast({
+        title: "Success!",
+        description: "You have been logged in.",
+      });
+      setOpen(false);
+      navigate(`/profile/${profileData.username}`);
+    }
+  };
+
+  const handleSuccessfulSignUp = async (user: any) => {
+    const { error: profileError } = await authService.createProfile(
+      user.id,
+      trimmedEmail.split('@')[0]
+    );
+
+    if (profileError) {
+      console.error('Error creating profile:', profileError);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to create user profile",
+      });
+    } else {
+      toast({
+        title: "Success!",
+        description: "Please check your email to confirm your account. The confirmation email might take a few minutes to arrive. Check your spam folder if you don't see it.",
+      });
+      setOpen(false);
     }
   };
 
@@ -203,53 +181,16 @@ export function SignUpDialog() {
             }
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleAuth} className="space-y-4 mt-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="Enter your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="Enter your password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={6}
-            />
-          </div>
-          <Button
-            type="submit"
-            className="w-full bg-black text-white hover:bg-gray-800"
-            disabled={loading}
-          >
-            {loading 
-              ? (isLogin ? "Logging in..." : "Creating account...") 
-              : (isLogin ? "Log in" : "Create account")
-            }
-          </Button>
-          <div className="text-center">
-            <button
-              type="button"
-              onClick={() => setIsLogin(!isLogin)}
-              className="text-sm text-gray-600 hover:underline"
-            >
-              {isLogin 
-                ? "Don't have an account? Sign up" 
-                : "Already have an account? Log in"
-              }
-            </button>
-          </div>
-        </form>
+        <AuthForm
+          email={email}
+          setEmail={setEmail}
+          password={password}
+          setPassword={setPassword}
+          handleSubmit={handleAuth}
+          isLogin={isLogin}
+          loading={loading}
+          onToggleMode={() => setIsLogin(!isLogin)}
+        />
       </DialogContent>
     </Dialog>
   );
