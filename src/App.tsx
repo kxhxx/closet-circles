@@ -4,6 +4,7 @@ import ProductDetail from "./pages/ProductDetail";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import EditProfile from "./pages/EditProfile";
+import Messages from "./pages/Messages";
 import BottomNav from "./components/BottomNav";
 import "./App.css";
 
@@ -15,6 +16,7 @@ function App() {
         <Route path="/product/:id" element={<ProductDetail />} />
         <Route path="/profile/:username" element={<Profile />} />
         <Route path="/profile/edit" element={<EditProfile />} />
+        <Route path="/messages" element={<Messages />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <BottomNav />
