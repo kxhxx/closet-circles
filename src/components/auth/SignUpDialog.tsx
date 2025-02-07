@@ -66,7 +66,7 @@ export function SignUpDialog() {
         if (error) {
           handleSignUpError(error);
         } else if (data.user) {
-          await handleSuccessfulSignUp(data.user);
+          await handleSuccessfulSignUp(data.user, trimmedEmail);
         }
       }
     } catch (error) {
@@ -142,10 +142,10 @@ export function SignUpDialog() {
     }
   };
 
-  const handleSuccessfulSignUp = async (user: any) => {
+  const handleSuccessfulSignUp = async (user: any, email: string) => {
     const { error: profileError } = await authService.createProfile(
       user.id,
-      trimmedEmail.split('@')[0]
+      email.split('@')[0]
     );
 
     if (profileError) {
