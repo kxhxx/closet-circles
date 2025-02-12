@@ -1,4 +1,5 @@
-import { Button } from "./ui/button";
+
+import MenswearSection from "./MenswearSection";
 
 const categories = [
   { name: "Menswear", image: "/lovable-uploads/7c2bb23a-97b9-4fb8-8aea-3d640a643233.png" },
@@ -10,7 +11,8 @@ const CategorySection = () => {
     <section className="py-8">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {categories.map((category) => (
+          <MenswearSection />
+          {categories.slice(1).map((category) => (
             <div key={category.name} className="relative h-[400px] overflow-hidden rounded-lg">
               <img
                 src={category.image}
@@ -19,9 +21,9 @@ const CategorySection = () => {
               />
               <div className="absolute inset-0 bg-black bg-opacity-20 flex flex-col items-center justify-center">
                 <h2 className="text-white text-4xl font-bold mb-4">{category.name}</h2>
-                <Button className="bg-white text-black hover:bg-gray-100">
+                <button className="bg-white text-black hover:bg-gray-100 px-4 py-2 rounded">
                   Shop now
-                </Button>
+                </button>
               </div>
             </div>
           ))}
