@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
@@ -18,7 +19,9 @@ const ProductGrid = () => {
   const { data: products, isLoading } = useQuery({
     queryKey: ["products", activeSearch, priceRange, selectedCategory, sortBy],
     queryFn: async () => {
-      let query = supabase.from("items").select("*");
+      let query = supabase.from("items")
+        .select("*")
+        .eq("category", "menswear"); // Filter for menswear items only
 
       if (activeSearch) {
         query = query.ilike("title", `%${activeSearch}%`);
@@ -75,21 +78,19 @@ const ProductGrid = () => {
   }
 
   return (
-    <section className="py-8">
-      <div className="container mx-auto px-4">
-        <FilterSection
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          onSearch={handleSearch}
-          selectedCategory={selectedCategory}
-          setSelectedCategory={setSelectedCategory}
-          priceRange={priceRange}
-          setPriceRange={setPriceRange}
-          sortBy={sortBy}
-          setSortBy={setSortBy}
-        />
-        <ProductList products={products || []} />
-      </div>
+    <section>
+      <FilterSection
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        onSearch={handleSearch}
+        selectedCategory={selectedCategory}
+        setSelectedCategory={setSelectedCategory}
+        priceRange={priceRange}
+        setPriceRange={setPriceRange}
+        sortBy={sortBy}
+        setSortBy={setSortBy}
+      />
+      <ProductList products={products || []} />
     </section>
   );
 };

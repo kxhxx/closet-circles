@@ -1,6 +1,7 @@
+
 import Navbar from "@/components/Navbar";
 import CategorySection from "@/components/CategorySection";
-import ProductGrid from "@/components/ProductGrid";
+import MenswearSection from "@/components/MenswearSection";
 
 const Index = () => {
   return (
@@ -8,7 +9,7 @@ const Index = () => {
       <Navbar />
       <main>
         <CategorySection />
-        <ProductGrid />
+        <MenswearSection />
       </main>
     </div>
   );
