@@ -4,18 +4,18 @@ import ProductGrid from "./ProductGrid";
 import { Link } from "react-router-dom";
 import { 
   Shirt, 
-  Pants, 
+  Scroll, // Replacing Pants with Scroll for Bottom-wear
   Watch, 
   Snowflake, 
-  Shoe 
+  Footprints // Replacing Shoe with Footprints
 } from "lucide-react";
 
 const categories = [
   { name: "T-Shirts", icon: Shirt },
-  { name: "Bottom-wear", icon: Pants },
+  { name: "Bottom-wear", icon: Scroll },
   { name: "Accessories", icon: Watch },
   { name: "Winter Wear", icon: Snowflake },
-  { name: "Footwear", icon: Shoe },
+  { name: "Footwear", icon: Footprints },
 ];
 
 const MenswearSection = () => {
