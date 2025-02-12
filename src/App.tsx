@@ -7,6 +7,7 @@ import NotFound from "./pages/NotFound";
 import EditProfile from "./pages/EditProfile";
 import Messages from "./pages/Messages";
 import MenswearPage from "./pages/MenswearPage";
+import WomenswearPage from "./pages/WomenswearPage";
 import BottomNav from "./components/BottomNav";
 import "./App.css";
 
@@ -16,6 +17,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/menswear" element={<MenswearPage />} />
+        <Route path="/womenswear" element={<WomenswearPage />} />
         <Route path="/product/:id" element={<ProductDetail />} />
         <Route path="/profile/:username" element={<Profile />} />
         <Route path="/profile/edit" element={<EditProfile />} />
