@@ -1,3 +1,4 @@
+
 import { Menu, Search, ShoppingBag } from "lucide-react";
 import { Button } from "./ui/button";
 import { SignUpDialog } from "./auth/SignUpDialog";
@@ -6,6 +7,7 @@ import Cart from "@/pages/Cart";
 import { useState } from "react";
 import { SidebarProvider } from "./ui/sidebar";
 import NavigationPanel from "./NavigationPanel";
+import { Link } from "react-router-dom";
 
 const Navbar = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -54,6 +56,16 @@ const Navbar = () => {
         </div>
 
         <div className="flex items-center gap-4">
+          <SignUpDialog />
+          <Button className="bg-black text-white hover:bg-gray-800">
+            Sign up
+          </Button>
+          <Button 
+            variant="outline" 
+            className="border-2 border-black hover:bg-gray-100"
+          >
+            Sell now
+          </Button>
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon">
@@ -64,7 +76,6 @@ const Navbar = () => {
               <Cart />
             </SheetContent>
           </Sheet>
-          <SignUpDialog />
         </div>
       </div>
     </nav>
