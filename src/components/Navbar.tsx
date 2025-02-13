@@ -73,8 +73,11 @@ const Navbar = () => {
             Sell now
           </Button>
           <SignUpDialog />
-          <Button className="bg-black text-white hover:bg-gray-800">
-            Sign up
+          <Button 
+            className="bg-black text-white hover:bg-gray-800"
+            asChild
+          >
+            <Link to="/auth">Sign up</Link>
           </Button>
         </div>
       </div>
