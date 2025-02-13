@@ -56,16 +56,6 @@ const Navbar = () => {
         </div>
 
         <div className="flex items-center gap-4">
-          <SignUpDialog />
-          <Button className="bg-black text-white hover:bg-gray-800">
-            Sign up
-          </Button>
-          <Button 
-            variant="outline" 
-            className="border-2 border-black hover:bg-gray-100"
-          >
-            Sell now
-          </Button>
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon">
@@ -76,6 +66,16 @@ const Navbar = () => {
               <Cart />
             </SheetContent>
           </Sheet>
+          <Button 
+            variant="outline" 
+            className="border-2 border-black hover:bg-gray-100"
+          >
+            Sell now
+          </Button>
+          <SignUpDialog />
+          <Button className="bg-black text-white hover:bg-gray-800">
+            Sign up
+          </Button>
         </div>
       </div>
     </nav>
