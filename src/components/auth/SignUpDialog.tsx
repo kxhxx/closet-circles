@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -24,9 +23,18 @@ export function SignUpDialog({ initialMode = 'login' }: SignUpDialogProps) {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
-  const [isLogin, setIsLogin] = useState(initialMode === 'login');
+  const [currentMode, setCurrentMode] = useState(initialMode);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  const handleDialogChange = (isOpen: boolean) => {
+    setOpen(isOpen);
+    if (!isOpen) {
+      setCurrentMode(initialMode);
+      setEmail("");
+      setPassword("");
+    }
+  };
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,7 +53,7 @@ export function SignUpDialog({ initialMode = 'login' }: SignUpDialogProps) {
     }
 
     const passwordError = validatePassword(trimmedPassword);
-    if (!isLogin && passwordError) {
+    if (currentMode === 'signup' && passwordError) {
       toast({
         variant: "destructive",
         title: "Invalid Password",
@@ -57,7 +65,7 @@ export function SignUpDialog({ initialMode = 'login' }: SignUpDialogProps) {
     setLoading(true);
 
     try {
-      if (isLogin) {
+      if (currentMode === 'login') {
         const { data: authData, error: authError } = await authService.signIn(trimmedEmail, trimmedPassword);
 
         if (authError) {
@@ -117,7 +125,7 @@ export function SignUpDialog({ initialMode = 'login' }: SignUpDialogProps) {
         title: "Sign Up Failed",
         description: "This email is already registered. Please try logging in instead.",
       });
-      setIsLogin(true);
+      setCurrentMode('login');
     } else {
       toast({
         variant: "destructive",
@@ -170,17 +178,17 @@ export function SignUpDialog({ initialMode = 'login' }: SignUpDialogProps) {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleDialogChange}>
       <DialogTrigger asChild>
         <Button className="bg-black text-white hover:bg-gray-800">
-          {isLogin ? "Log in" : "Sign up"}
+          {initialMode === 'login' ? "Log in" : "Sign up"}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>{isLogin ? "Log in to your account" : "Create an account"}</DialogTitle>
+          <DialogTitle>{currentMode === 'login' ? "Log in to your account" : "Create an account"}</DialogTitle>
           <DialogDescription>
-            {isLogin 
+            {currentMode === 'login' 
               ? "Enter your email and password to log in. Make sure you've confirmed your email address."
               : "Enter your email and password to create your account. You'll need to confirm your email address before logging in."
             }
@@ -192,9 +200,9 @@ export function SignUpDialog({ initialMode = 'login' }: SignUpDialogProps) {
           password={password}
           setPassword={setPassword}
           handleSubmit={handleAuth}
-          isLogin={isLogin}
+          isLogin={currentMode === 'login'}
           loading={loading}
-          onToggleMode={() => setIsLogin(!isLogin)}
+          onToggleMode={() => setCurrentMode(currentMode === 'login' ? 'signup' : 'login')}
         />
       </DialogContent>
     </Dialog>
