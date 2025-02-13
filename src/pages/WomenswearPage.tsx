@@ -1,7 +1,7 @@
 
 import Navbar from "@/components/Navbar";
 import { 
-  Dress, 
+  Shirt, 
   Scroll,
   Watch, 
   Snowflake, 
@@ -12,7 +12,7 @@ import { Link } from "react-router-dom";
 import ProductGrid from "@/components/ProductGrid";
 
 const categories = [
-  { name: "Dresses", icon: Dress },
+  { name: "Dresses", icon: Shirt },
   { name: "Bottom-wear", icon: Scroll },
   { name: "Accessories", icon: Watch },
   { name: "Winter Wear", icon: Snowflake },
