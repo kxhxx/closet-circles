@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -14,12 +15,16 @@ import { validateEmail, validatePassword } from "@/utils/authValidation";
 import { authService } from "@/services/authService";
 import { AuthForm } from "./AuthForm";
 
-export function SignUpDialog() {
+interface SignUpDialogProps {
+  initialMode?: 'login' | 'signup';
+}
+
+export function SignUpDialog({ initialMode = 'login' }: SignUpDialogProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
-  const [isLogin, setIsLogin] = useState(true);
+  const [isLogin, setIsLogin] = useState(initialMode === 'login');
   const navigate = useNavigate();
   const { toast } = useToast();
 

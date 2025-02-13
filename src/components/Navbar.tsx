@@ -72,8 +72,8 @@ const Navbar = () => {
           >
             Sell now
           </Button>
-          <SignUpDialog />
-          <SignUpDialog />
+          <SignUpDialog initialMode="login" />
+          <SignUpDialog initialMode="signup" />
         </div>
       </div>
     </nav>
