@@ -14,16 +14,52 @@ import "./App.css";
 function App() {
   return (
     <Router>
-      <Routes>
-        <Route path="/" element={<Index />} />
-        <Route path="/menswear" element={<MenswearPage />} />
-        <Route path="/womenswear" element={<WomenswearPage />} />
-        <Route path="/product/:id" element={<ProductDetail />} />
-        <Route path="/profile/:username" element={<Profile />} />
-        <Route path="/profile/edit" element={<EditProfile />} />
-        <Route path="/messages" element={<Messages />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+      <div className="min-h-screen bg-white perspective-1000">
+        <div className="transform-preserve-3d">
+          <Routes>
+            <Route path="/" element={
+              <div className="transition-transform duration-500 animate-in fade-in slide-in-from-right-52">
+                <Index />
+              </div>
+            } />
+            <Route path="/menswear" element={
+              <div className="transition-transform duration-500 animate-in fade-in slide-in-from-right-52">
+                <MenswearPage />
+              </div>
+            } />
+            <Route path="/womenswear" element={
+              <div className="transition-transform duration-500 animate-in fade-in slide-in-from-right-52">
+                <WomenswearPage />
+              </div>
+            } />
+            <Route path="/product/:id" element={
+              <div className="transition-transform duration-500 animate-in fade-in slide-in-from-right-52">
+                <ProductDetail />
+              </div>
+            } />
+            <Route path="/profile/:username" element={
+              <div className="transition-transform duration-500 animate-in fade-in slide-in-from-right-52">
+                <Profile />
+              </div>
+            } />
+            <Route path="/profile/edit" element={
+              <div className="transition-transform duration-500 animate-in fade-in slide-in-from-right-52">
+                <EditProfile />
+              </div>
+            } />
+            <Route path="/messages" element={
+              <div className="transition-transform duration-500 animate-in fade-in slide-in-from-right-52">
+                <Messages />
+              </div>
+            } />
+            <Route path="*" element={
+              <div className="transition-transform duration-500 animate-in fade-in slide-in-from-right-52">
+                <NotFound />
+              </div>
+            } />
+          </Routes>
+        </div>
+      </div>
       <BottomNav />
     </Router>
   );
