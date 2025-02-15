@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -13,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { validateEmail, validatePassword } from "@/utils/authValidation";
 import { authService } from "@/services/authService";
 import { AuthForm } from "./AuthForm";
+import { dialogTransitionVariants } from "@/utils/animation";
 
 interface SignUpDialogProps {
   initialMode?: 'login' | 'signup';
@@ -180,30 +182,39 @@ export function SignUpDialog({ initialMode = 'login' }: SignUpDialogProps) {
   return (
     <Dialog open={open} onOpenChange={handleDialogChange}>
       <DialogTrigger asChild>
-        <Button className="bg-black text-white hover:bg-gray-800">
+        <Button className="bg-black text-white hover:bg-gray-800 transition-transform hover:scale-105">
           {initialMode === 'login' ? "Log in" : "Sign up"}
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>{currentMode === 'login' ? "Log in to your account" : "Create an account"}</DialogTitle>
-          <DialogDescription>
+      <DialogContent className={`sm:max-w-[425px] perspective-1000 transform-preserve-3d ${
+        open ? dialogTransitionVariants.animate : dialogTransitionVariants.initial
+      }`}>
+        <DialogHeader className="transform-preserve-3d">
+          <DialogTitle className="transition-transform duration-300">
+            {currentMode === 'login' ? "Log in to your account" : "Create an account"}
+          </DialogTitle>
+          <DialogDescription className="transition-transform duration-300">
             {currentMode === 'login' 
               ? "Enter your email and password to log in. Make sure you've confirmed your email address."
               : "Enter your email and password to create your account. You'll need to confirm your email address before logging in."
             }
           </DialogDescription>
         </DialogHeader>
-        <AuthForm
-          email={email}
-          setEmail={setEmail}
-          password={password}
-          setPassword={setPassword}
-          handleSubmit={handleAuth}
-          isLogin={currentMode === 'login'}
-          loading={loading}
-          onToggleMode={() => setCurrentMode(currentMode === 'login' ? 'signup' : 'login')}
-        />
+        <div className="transform-preserve-3d transition-transform duration-300">
+          <AuthForm
+            email={email}
+            setEmail={setEmail}
+            password={password}
+            setPassword={setPassword}
+            handleSubmit={handleAuth}
+            isLogin={currentMode === 'login'}
+            loading={loading}
+            onToggleMode={() => {
+              const newMode = currentMode === 'login' ? 'signup' : 'login';
+              setCurrentMode(newMode);
+            }}
+          />
+        </div>
       </DialogContent>
     </Dialog>
   );
