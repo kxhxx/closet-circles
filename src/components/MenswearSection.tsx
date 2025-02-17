@@ -10,7 +10,7 @@ const MenswearSection = () => {
           <img
             src="/lovable-uploads/7c2bb23a-97b9-4fb8-8aea-3d640a643233.png"
             alt="Menswear"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover transform translate-y-10"
           />
           <div className="absolute inset-0 bg-black bg-opacity-20 flex flex-col items-center justify-center">
             <h2 className="text-white text-4xl font-bold mb-4">Menswear</h2>
