@@ -7,10 +7,11 @@ const WomenswearSection = () => {
     <section className="py-8">
       <div className="container mx-auto px-4">
         <div className="relative h-[400px] overflow-hidden rounded-lg mb-8">
+          {/* Background image shifted up by 100px */}
           <img
             src="/lovable-uploads/7c2bb23a-97b9-4fb8-8aea-3d640a643233.png"
             alt="Womenswear"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover absolute top-[-100px]"
           />
           <div className="absolute inset-0 bg-black bg-opacity-20 flex flex-col items-center justify-center">
             <h2 className="text-white text-4xl font-bold mb-4">Womenswear</h2>
@@ -25,3 +26,4 @@ const WomenswearSection = () => {
 };
 
 export default WomenswearSection;
+
