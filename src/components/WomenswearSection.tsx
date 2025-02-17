@@ -6,10 +6,11 @@ const WomenswearSection = () => {
     <section className="py-8">
       <div className="container mx-auto px-4">
         <div className="relative h-[400px] overflow-hidden rounded-lg mb-8">
+          {/* Updated Image URL & Shifted Up by 100px */}
           <img
-            src="/lovable-uploads/7c2bb23a-97b9-4fb8-8aea-3d640a643233.png"
+            src="https://cdn2.stylecraze.com/wp-content/uploads/2020/09/Beautiful-Women-In-The-World.jpg.webp"
             alt="Womenswear"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover absolute top-[-100px]"
           />
           <div className="absolute inset-0 bg-black bg-opacity-20 flex flex-col items-center justify-center">
             <h2 className="text-white text-4xl font-bold mb-4">Womenswear</h2>
