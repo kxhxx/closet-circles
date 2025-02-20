@@ -10,7 +10,7 @@ const WomenswearSection = () => {
           <img
             src="https://cdn2.stylecraze.com/wp-content/uploads/2020/09/Beautiful-Women-In-The-World.jpg.webp"
             alt="Womenswear"
-            className="w-full h-full object-cover absolute top-[1px]"
+            className="w-full h-full object-cover absolute top-0"
           />
           <div className="absolute inset-0 bg-black bg-opacity-20 flex flex-col items-center justify-center">
             <h2 className="text-white text-4xl font-bold mb-4">Womenswear</h2>
