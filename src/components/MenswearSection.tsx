@@ -10,7 +10,7 @@ const MenswearSection = () => {
           <img
             src="https://img.freepik.com/premium-photo/portrait-handsome-male-model_379823-21946.jpg"
             alt="Menswear"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover transform scale-[1.1]"
           />
           <div className="absolute inset-0 bg-black bg-opacity-20 flex flex-col items-center justify-center">
             <h2 className="text-white text-4xl font-bold mb-4">Menswear</h2>
