@@ -8,7 +8,7 @@ const MenswearSection = () => {
       <div className="container mx-auto px-4">
         <div className="relative h-[400px] overflow-hidden rounded-lg mb-8">
           <img
-            src="/lovable-uploads/7c2bb23a-97b9-4fb8-8aea-3d640a643233.png"
+            src="https://img.freepik.com/premium-photo/portrait-handsome-male-model_379823-21946.jpg"
             alt="Menswear"
             className="w-full h-full object-cover"
           />
