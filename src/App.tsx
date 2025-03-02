@@ -8,6 +8,7 @@ import EditProfile from "./pages/EditProfile";
 import Messages from "./pages/Messages";
 import MenswearPage from "./pages/MenswearPage";
 import WomenswearPage from "./pages/WomenswearPage";
+import SellPage from "./pages/SellPage";
 import BottomNav from "./components/BottomNav";
 import "./App.css";
 
@@ -50,6 +51,11 @@ function App() {
             <Route path="/messages" element={
               <div className="transition-transform duration-500 animate-in fade-in slide-in-from-right-52">
                 <Messages />
+              </div>
+            } />
+            <Route path="/sell" element={
+              <div className="transition-transform duration-500 animate-in fade-in slide-in-from-right-52">
+                <SellPage />
               </div>
             } />
             <Route path="*" element={

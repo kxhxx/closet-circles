@@ -7,11 +7,12 @@ import Cart from "@/pages/Cart";
 import { useState } from "react";
 import { SidebarProvider } from "./ui/sidebar";
 import NavigationPanel from "./NavigationPanel";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const Navbar = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isNavOpen, setIsNavOpen] = useState(false);
+  const navigate = useNavigate();
 
   const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
@@ -69,6 +70,7 @@ const Navbar = () => {
           <Button 
             variant="outline" 
             className="border-2 border-black hover:bg-gray-100 transition-transform hover:scale-105"
+            onClick={() => navigate('/sell')}
           >
             Sell now
           </Button>
