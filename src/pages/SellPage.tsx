@@ -17,6 +17,7 @@ import {
   CardTitle 
 } from "@/components/ui/card";
 import { Camera, Upload } from "lucide-react";
+import { Item } from "@/types/database";
 
 const SellPage = () => {
   const navigate = useNavigate();
@@ -124,7 +125,11 @@ const SellPage = () => {
 
       // Navigate to the product page
       setTimeout(() => {
-        navigate(`/product/${itemData.id}`);
+        if (itemData) {
+          navigate(`/product/${itemData.id}`);
+        } else {
+          navigate('/');
+        }
       }, 1500);
       
     } catch (error) {
