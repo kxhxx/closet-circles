@@ -1,4 +1,5 @@
-import { useParams, useNavigate } from "react-router-dom";
+
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Heart, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -6,16 +7,46 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import Navbar from "@/components/Navbar";
 import { useToast } from "@/hooks/use-toast";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { authService } from "@/services/authService";
 
 const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
+  const [user, setUser] = useState<any>(null);
+  const [isLiked, setIsLiked] = useState(false);
   
   // Validate ID parameter
   const numericId = id ? Number(id) : null;
   const isValidId = numericId && !isNaN(numericId) && Number.isInteger(numericId);
+
+  // Get buy intent from URL query params
+  const buyIntent = new URLSearchParams(location.search).get('intent') === 'buy';
+
+  useEffect(() => {
+    // Check authentication status
+    const checkAuth = async () => {
+      const { data } = await supabase.auth.getSession();
+      setUser(data.session?.user || null);
+      
+      // Check if item is liked
+      if (data.session?.user && numericId) {
+        const liked = authService.checkIfLiked(data.session.user.id, numericId);
+        setIsLiked(liked);
+      }
+    };
+    
+    checkAuth();
+    
+    // If buyIntent is true, scroll to buy section
+    if (buyIntent) {
+      setTimeout(() => {
+        document.getElementById('buy-section')?.scrollIntoView({ behavior: 'smooth' });
+      }, 500);
+    }
+  }, [numericId, buyIntent]);
 
   const { data: item, isLoading, error } = useQuery({
     queryKey: ["item", numericId],
@@ -57,6 +88,107 @@ const ProductDetail = () => {
       return data;
     },
   });
+  
+  const handleLikeToggle = async () => {
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "Please sign in to like this item",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!numericId) return;
+    
+    const { action, isLiked: newLikedState } = await authService.toggleLike(
+      user.id,
+      numericId
+    );
+    
+    setIsLiked(newLikedState);
+    
+    toast({
+      title: action === 'liked' ? "Added to favorites" : "Removed from favorites",
+      description: action === 'liked' ? "This item has been added to your favorites" : "This item has been removed from your favorites",
+    });
+  };
+  
+  const handleAddToCart = async () => {
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "Please sign in to add items to cart",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!numericId) return;
+    
+    await authService.addToCart(user.id, numericId);
+    
+    toast({
+      title: "Added to cart",
+      description: `${item?.title} has been added to your cart`,
+    });
+  };
+  
+  const handleBuyNow = async () => {
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "Please sign in to purchase items",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!item || !numericId) return;
+    
+    toast({
+      title: "Processing purchase",
+      description: "Redirecting to payment gateway...",
+    });
+    
+    // Simulate payment process
+    setTimeout(() => {
+      // In a real app this would be handled via a payment gateway
+      authService.buyNow(numericId, user.id, item.user_id, item.price)
+        .then(() => {
+          toast({
+            title: "Purchase successful",
+            description: `You have successfully purchased ${item.title}`,
+          });
+        })
+        .catch((err) => {
+          toast({
+            title: "Purchase failed",
+            description: err.message || "An error occurred during purchase",
+            variant: "destructive",
+          });
+        });
+    }, 2000);
+  };
+  
+  const handleMakeOffer = () => {
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "Please sign in to make an offer",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!item) return;
+    
+    // Show offer dialog or navigate to offer page
+    toast({
+      title: "Offers coming soon",
+      description: "This feature will be available soon",
+    });
+  };
 
   // Handle errors and navigation with useEffect
   useEffect(() => {
@@ -133,8 +265,13 @@ const ProductDetail = () => {
                 <h1 className="text-2xl font-bold">{item.title}</h1>
                 <p className="text-xl font-medium mt-2">${item.price}</p>
               </div>
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <Heart className="h-5 w-5" />
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className={`rounded-full ${isLiked ? 'bg-red-100 text-red-500' : ''}`}
+                onClick={handleLikeToggle}
+              >
+                <Heart className={`h-5 w-5 ${isLiked ? 'fill-current' : ''}`} />
               </Button>
             </div>
 
@@ -175,9 +312,18 @@ const ProductDetail = () => {
               </CardContent>
             </Card>
 
-            <div className="flex gap-4">
-              <Button className="flex-1">Buy Now</Button>
-              <Button variant="outline" className="flex-1">
+            <div id="buy-section" className="flex gap-4">
+              <Button 
+                className="flex-1"
+                onClick={handleBuyNow}
+              >
+                Buy Now
+              </Button>
+              <Button 
+                variant="outline" 
+                className="flex-1"
+                onClick={handleMakeOffer}
+              >
                 Make Offer
               </Button>
             </div>
