@@ -59,16 +59,12 @@ export const authService = {
         .eq('following_id', followingId);
         
       // Update follower count
-      await supabase
-        .from('profiles')
-        .update({ followers_count: supabase.rpc('decrement') })
-        .eq('id', followingId);
+      const { data: followerData } = await supabase
+        .rpc('decrement_followers_count', { user_id: followingId });
         
       // Update following count
-      await supabase
-        .from('profiles')
-        .update({ following_count: supabase.rpc('decrement') })
-        .eq('id', followerId);
+      const { data: followingData } = await supabase
+        .rpc('decrement_following_count', { user_id: followerId });
         
       return { action: 'unfollowed' };
     } else {
@@ -78,16 +74,12 @@ export const authService = {
         .insert([{ follower_id: followerId, following_id: followingId }]);
         
       // Update follower count
-      await supabase
-        .from('profiles')
-        .update({ followers_count: supabase.rpc('increment') })
-        .eq('id', followingId);
+      const { data: followerData } = await supabase
+        .rpc('increment_followers_count', { user_id: followingId });
         
       // Update following count
-      await supabase
-        .from('profiles')
-        .update({ following_count: supabase.rpc('increment') })
-        .eq('id', followerId);
+      const { data: followingData } = await supabase
+        .rpc('increment_following_count', { user_id: followerId });
         
       return { action: 'followed' };
     }
