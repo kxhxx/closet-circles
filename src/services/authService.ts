@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Profile } from "@/types/database";
 
@@ -59,15 +58,16 @@ export const authService = {
         .eq('follower_id', followerId)
         .eq('following_id', followingId);
         
-      // Decrement counts
+      // Update follower count
       await supabase
         .from('profiles')
-        .update({ followers_count: supabase.rpc('decrement', { x: 1 }) })
+        .update({ followers_count: supabase.rpc('decrement') })
         .eq('id', followingId);
         
+      // Update following count
       await supabase
         .from('profiles')
-        .update({ following_count: supabase.rpc('decrement', { x: 1 }) })
+        .update({ following_count: supabase.rpc('decrement') })
         .eq('id', followerId);
         
       return { action: 'unfollowed' };
@@ -77,15 +77,16 @@ export const authService = {
         .from('follows')
         .insert([{ follower_id: followerId, following_id: followingId }]);
         
-      // Increment counts
+      // Update follower count
       await supabase
         .from('profiles')
-        .update({ followers_count: supabase.rpc('increment', { x: 1 }) })
+        .update({ followers_count: supabase.rpc('increment') })
         .eq('id', followingId);
         
+      // Update following count
       await supabase
         .from('profiles')
-        .update({ following_count: supabase.rpc('increment', { x: 1 }) })
+        .update({ following_count: supabase.rpc('increment') })
         .eq('id', followerId);
         
       return { action: 'followed' };
@@ -103,7 +104,6 @@ export const authService = {
     return !!data;
   },
 
-  // Add to cart functionality
   async addToCart(userId: string, itemId: number) {
     // This is a simplified implementation
     // In a real app, you would have a cart table in your database
@@ -121,7 +121,6 @@ export const authService = {
     return cartItems;
   },
 
-  // Buy now functionality
   async buyNow(itemId: number, buyerId: string, sellerId: string, amount: number) {
     // In reality, this would connect to a payment processor
     return await supabase
@@ -131,7 +130,6 @@ export const authService = {
       ]);
   },
 
-  // Toggle like functionality
   async toggleLike(userId: string, itemId: number) {
     // Simplified implementation using localStorage
     const likedItems = JSON.parse(localStorage.getItem(`liked_${userId}`) || '[]');
@@ -150,7 +148,6 @@ export const authService = {
     }
   },
 
-  // Check if item is liked
   checkIfLiked(userId: string, itemId: number) {
     const likedItems = JSON.parse(localStorage.getItem(`liked_${userId}`) || '[]');
     return likedItems.includes(itemId);
