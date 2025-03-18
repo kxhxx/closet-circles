@@ -221,7 +221,30 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      decrement_followers_count: {
+        Args: {
+          user_id: string
+        }
+        Returns: undefined
+      }
+      decrement_following_count: {
+        Args: {
+          user_id: string
+        }
+        Returns: undefined
+      }
+      increment_followers_count: {
+        Args: {
+          user_id: string
+        }
+        Returns: undefined
+      }
+      increment_following_count: {
+        Args: {
+          user_id: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

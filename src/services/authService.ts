@@ -59,11 +59,11 @@ export const authService = {
         .eq('following_id', followingId);
         
       // Update follower count
-      const { data: followerData } = await supabase
+      await supabase
         .rpc('decrement_followers_count', { user_id: followingId });
         
       // Update following count
-      const { data: followingData } = await supabase
+      await supabase
         .rpc('decrement_following_count', { user_id: followerId });
         
       return { action: 'unfollowed' };
@@ -74,11 +74,11 @@ export const authService = {
         .insert([{ follower_id: followerId, following_id: followingId }]);
         
       // Update follower count
-      const { data: followerData } = await supabase
+      await supabase
         .rpc('increment_followers_count', { user_id: followingId });
         
       // Update following count
-      const { data: followingData } = await supabase
+      await supabase
         .rpc('increment_following_count', { user_id: followerId });
         
       return { action: 'followed' };
