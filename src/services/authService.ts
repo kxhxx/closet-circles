@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Profile } from "@/types/database";
 
@@ -14,6 +15,14 @@ export const authService = {
       email,
       password,
     });
+  },
+
+  async signOut() {
+    return await supabase.auth.signOut();
+  },
+
+  async getCurrentSession() {
+    return await supabase.auth.getSession();
   },
 
   async createProfile(userId: string, username: string) {

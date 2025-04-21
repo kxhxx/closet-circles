@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Dialog,
@@ -15,6 +15,7 @@ import { validateEmail, validatePassword } from "@/utils/authValidation";
 import { authService } from "@/services/authService";
 import { AuthForm } from "./AuthForm";
 import { dialogTransitionVariants } from "@/utils/animation";
+import { supabase } from "@/integrations/supabase/client";
 
 interface SignUpDialogProps {
   initialMode?: 'login' | 'signup';
@@ -68,19 +69,29 @@ export function SignUpDialog({ initialMode = 'login' }: SignUpDialogProps) {
 
     try {
       if (currentMode === 'login') {
-        const { data: authData, error: authError } = await authService.signIn(trimmedEmail, trimmedPassword);
+        console.log("Attempting login with:", { email: trimmedEmail });
+        const { data, error } = await authService.signIn(trimmedEmail, trimmedPassword);
 
-        if (authError) {
-          handleAuthError(authError);
-        } else if (authData.user) {
-          await handleSuccessfulLogin(authData.user.id);
+        if (error) {
+          console.error('Login error:', error);
+          handleAuthError(error);
+        } else if (data?.user) {
+          console.log("Login successful:", data.user);
+          await handleSuccessfulLogin(data.user.id);
+        } else {
+          console.error('Login response missing user data');
+          toast({
+            variant: "destructive",
+            title: "Login Failed",
+            description: "An unexpected error occurred. Please try again.",
+          });
         }
       } else {
         const { data, error } = await authService.signUp(trimmedEmail, trimmedPassword);
 
         if (error) {
           handleSignUpError(error);
-        } else if (data.user) {
+        } else if (data?.user) {
           await handleSuccessfulSignUp(data.user, trimmedEmail);
         }
       }
@@ -138,44 +149,62 @@ export function SignUpDialog({ initialMode = 'login' }: SignUpDialogProps) {
   };
 
   const handleSuccessfulLogin = async (userId: string) => {
-    const { data: profileData, error: profileError } = await authService.fetchUserProfile(userId);
+    try {
+      const { data: profileData, error: profileError } = await authService.fetchUserProfile(userId);
 
-    if (profileError) {
-      console.error('Profile fetch error:', profileError);
+      if (profileError) {
+        console.error('Profile fetch error:', profileError);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to fetch user profile",
+        });
+      } else {
+        toast({
+          title: "Success!",
+          description: "You have been logged in.",
+        });
+        setOpen(false);
+        navigate(`/profile/${profileData.username}`);
+      }
+    } catch (error) {
+      console.error('Error in handleSuccessfulLogin:', error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to fetch user profile",
+        description: "An unexpected error occurred while logging in.",
       });
-    } else {
-      toast({
-        title: "Success!",
-        description: "You have been logged in.",
-      });
-      setOpen(false);
-      navigate(`/profile/${profileData.username}`);
     }
   };
 
   const handleSuccessfulSignUp = async (user: any, email: string) => {
-    const { error: profileError } = await authService.createProfile(
-      user.id,
-      email.split('@')[0]
-    );
+    try {
+      const { error: profileError } = await authService.createProfile(
+        user.id,
+        email.split('@')[0]
+      );
 
-    if (profileError) {
-      console.error('Error creating profile:', profileError);
+      if (profileError) {
+        console.error('Error creating profile:', profileError);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to create user profile",
+        });
+      } else {
+        toast({
+          title: "Success!",
+          description: "Please check your email to confirm your account. The confirmation email might take a few minutes to arrive. Check your spam folder if you don't see it.",
+        });
+        setOpen(false);
+      }
+    } catch (error) {
+      console.error('Error in handleSuccessfulSignUp:', error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to create user profile",
+        description: "An unexpected error occurred during sign up.",
       });
-    } else {
-      toast({
-        title: "Success!",
-        description: "Please check your email to confirm your account. The confirmation email might take a few minutes to arrive. Check your spam folder if you don't see it.",
-      });
-      setOpen(false);
     }
   };
 
