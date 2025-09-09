@@ -12,4 +12,4 @@ This project is built with .
 
 ## How can I deploy this project?
 
-Simply open [Lovable](https://lovable.dev/projects/ef9ebd06-2357-4100-82e5-10433a9e12ed)
+Simply open [this](https://lovable.dev/projects/ef9ebd06-2357-4100-82e5-10433a9e12ed)
